@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}ShambaLink{% endblock %}
+
+{% block content %}
+<section class="sl-hero">
+  <div>
+    <h1>Sell the harvest. <span class="accent">Skip the brokers.</span></h1>
+    <p class="lead">ShambaLink connects smallholder farmers directly with retailers, processors, and institutional buyers — transparent pricing, no middlemen taking a cut you never see.</p>
+    <div class="sl-hero-actions">
+      <a href="{{ url_for('auth.register') }}" class="sl-btn sl-btn-accent">List Your Harvest</a>
+      <a href="{{ url_for('main.marketplace') }}" class="sl-btn sl-btn-outline">Browse the Marketplace</a>
+    </div>
+  </div>
+  <div class="sl-hero-visual">
+    <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=1200&auto=format&fit=crop" alt="Rows of crops on a smallholder farm">
+  </div>
+</section>
+
+<div class="sl-ticker">
+  <div class="sl-ticker-track">
+    {% for item in (featured * 3) %}
+      <div class="sl-ticker-item">
+        <span class="sl-ticker-dot">&#9679;</span>
+        <span class="crop">{{ item.crop_name }}</span>
+        <span class="price">KES {{ "%.0f"|format(item.price_per_unit) }}/{{ item.unit }}</span>
+        <span class="loc">{{ item.location }}</span>
+      </div>
+    {% else %}
+      <div class="sl-ticker-item"><span class="crop">New listings appear here as farmers join.</span></div>
+    {% endfor %}
+  </div>
+</div>
+
+<section class="sl-section">
+  <div class="sl-section-head">
+    <h2>How it works</h2>
+  </div>
+  <div class="sl-grid-3">
+    <div class="sl-how-card">
+      <span class="step-label">01 &middot; Farmer</span>
+      <h3>List what's ready</h3>
+      <p>Post your harvest with quantity, price, and location in under two minutes. Update or pull a listing anytime.</p>
+    </div>
+    <div class="sl-how-card">
+      <span class="step-label">02 &middot; Buyer</span>
+      <h3>Browse and order</h3>
+      <p>Search by crop, category, or location. See real quantities and prices, then place an order directly.</p>
+    </div>
+    <div class="sl-how-card">
+      <span class="step-label">03 &middot; Both sides</span>
+      <h3>Confirm and fulfil</h3>
+      <p>Farmers confirm orders as they're packed; buyers track status from pending to delivered — no phone tag.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sl-section">
+  <div class="sl-section-head">
+    <h2>Fresh on the market</h2>
+    <a href="{{ url_for('main.marketplace') }}" class="sl-link-muted">View all &rarr;</a>
+  </div>
+
+  {% if featured %}
+    <div class="sl-grid-listings">
+      {% for listing in featured %}
+        {% include "marketplace/_listing_card.html" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="sl-empty">
+      <h3>No listings yet</h3>
+      <p>Be the first farmer to post a harvest.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
