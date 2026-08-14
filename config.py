@@ -17,10 +17,13 @@ class Config:
     MYSQL_PORT = os.environ.get("MYSQL_PORT", "3306")
     MYSQL_DB = os.environ.get("MYSQL_DB", "shamba_link")
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL",
-        f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}",
-    )
+    # Prefer an explicit DATABASE_URL when provided (e.g. on production).
+    # Otherwise fall back to a local SQLite file so the app can start without
+    # requiring a hosted MySQL instance during quick deploys / demos.
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    if not SQLALCHEMY_DATABASE_URI:
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'shamba.db')}"
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Pagination
