@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Not Found{% endblock %}
+{% block content %}
+<div class="sl-error-page">
+  <div class="code">404</div>
+  <h1>This field is empty</h1>
+  <p style="color:var(--text-muted);">Nothing's growing at that address.</p>
+  <a href="{{ url_for('main.marketplace') }}" class="sl-btn sl-btn-accent" style="margin-top:20px;">Browse the Marketplace</a>
+</div>
+{% endblock %}

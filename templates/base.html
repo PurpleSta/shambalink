@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ShambaLink{% endblock %} — Farm to Buyer, Direct</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<nav class="sl-nav">
+  <div class="sl-nav-inner">
+    <a class="sl-brand" href="{{ url_for('main.index') }}">
+      <span class="sl-brand-mark">S</span>
+      <span class="sl-brand-text">Shamba<em>Link</em></span>
+    </a>
+
+    <button class="sl-nav-toggle" type="button" aria-label="Toggle navigation" onclick="document.querySelector('.sl-nav-links').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="sl-nav-links">
+      <a href="{{ url_for('main.marketplace') }}" class="{{ 'active' if request.endpoint == 'main.marketplace' }}">Marketplace</a>
+
+      {% if current_user.is_authenticated %}
+        {% if current_user.is_farmer() %}
+          <a href="{{ url_for('dashboard.farmer_dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard.farmer_dashboard' }}">My Farm</a>
+          <a href="{{ url_for('dashboard.subscription') }}" class="{{ 'active' if request.endpoint and 'subscription' in request.endpoint }}">Subscription</a>
+          <a href="{{ url_for('dashboard.new_listing') }}" class="sl-btn sl-btn-accent sl-btn-sm">+ New Listing</a>
+        {% else %}
+          <a href="{{ url_for('dashboard.buyer_dashboard') }}" class="{{ 'active' if request.endpoint and 'dashboard' in request.endpoint }}">My Orders</a>
+        {% endif %}
+        <span class="sl-nav-user">{{ current_user.name.split(' ')[0] }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="sl-link-muted">Log out</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">Log in</a>
+        <a href="{{ url_for('auth.register') }}" class="sl-btn sl-btn-accent sl-btn-sm">Join Free</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="sl-flash-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="sl-flash sl-flash-{{ category }}" role="alert">
+            <span>{{ message }}</span>
+            <button type="button" class="sl-flash-close" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="sl-footer">
+  <div class="sl-footer-inner">
+    <div>
+      <span class="sl-brand-text sl-footer-brand">Shamba<em>Link</em></span>
+      <p>Direct lines between the farm gate and the buyer's dock.</p>
+    </div>
+    <div class="sl-footer-cols">
+      <div>
+        <h4>Platform</h4>
+        <a href="{{ url_for('main.marketplace') }}">Browse Marketplace</a>
+        <a href="{{ url_for('auth.register') }}">Join as a Farmer</a>
+        <a href="{{ url_for('auth.register') }}">Join as a Buyer</a>
+      </div>
+    </div>
+    <div class="sl-footer-bottom">&copy; {{ current_year }} ShambaLink. Built for Kenya's smallholder farmers.</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

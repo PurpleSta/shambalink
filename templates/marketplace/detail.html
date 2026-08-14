@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.crop_name }}{% endblock %}
+
+{% block content %}
+<div class="sl-detail">
+  <div class="sl-detail-main">
+    {% if listing.image_filename %}
+      <img class="sl-detail-image" src="{{ url_for('static', filename='uploads/' + listing.image_filename) }}" alt="{{ listing.crop_name }}">
+    {% endif %}
+    <span class="sl-card-category">{{ listing.category }}</span>
+    <h1 style="margin-top:14px;">{{ listing.crop_name }}</h1>
+    <p class="sl-detail-farmer">Listed by <strong>{{ listing.farmer.name }}</strong> &middot; {{ listing.location }}</p>
+
+    <p class="sl-detail-desc">{{ listing.description or "No additional description provided by the farmer." }}</p>
+
+    <div class="sl-detail-facts">
+      <div class="sl-fact"><div class="label">Available</div><div class="value">{{ listing.quantity_available }} {{ listing.unit }}</div></div>
+      <div class="sl-fact"><div class="label">Price</div><div class="value">KES {{ "%.2f"|format(listing.price_per_unit) }} / {{ listing.unit }}</div></div>
+      <div class="sl-fact"><div class="label">Harvest date</div><div class="value">{{ listing.harvest_date.strftime('%d %b %Y') if listing.harvest_date else '—' }}</div></div>
+      <div class="sl-fact"><div class="label">Status</div><div class="value"><span class="sl-badge sl-badge-{{ listing.status }}">{{ listing.status.replace('_',' ') }}</span></div></div>
+    </div>
+
+    {% if related %}
+      <h3 style="margin-top:44px;font-size:1.2rem;">More from this category</h3>
+      <div class="sl-grid-listings" style="margin-top:16px;">
+        {% for listing in related %}
+          {% include "marketplace/_listing_card.html" %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="sl-order-box">
+    {% if listing.status != 'active' %}
+      <p class="sub" style="margin-bottom:0;">This listing is currently <strong>{{ listing.status.replace('_',' ') }}</strong> and not accepting new orders.</p>
+    {% elif not current_user.is_authenticated %}
+      <p class="sub">Log in as a buyer to place an order.</p>
+      <a href="{{ url_for('auth.login', next=request.path) }}" class="sl-btn sl-btn-accent sl-btn-block">Log In to Order</a>
+    {% elif current_user.is_farmer() %}
+      <p class="sub" style="margin-bottom:0;">Farmer accounts can't place orders. Switch to a buyer account to purchase.</p>
+    {% elif listing.farmer_id == current_user.id %}
+      <p class="sub" style="margin-bottom:0;">This is your own listing.</p>
+      <a href="{{ url_for('dashboard.edit_listing', listing_id=listing.id) }}" class="sl-btn sl-btn-outline sl-btn-block" style="margin-top:14px;">Edit Listing</a>
+    {% else %}
+      <form method="post" action="{{ url_for('dashboard.place_order', listing_id=listing.id) }}">
+        <div class="sl-field">
+          <label for="order-quantity">Quantity ({{ listing.unit }})</label>
+          <input
+            type="number" step="0.01" min="0.01" max="{{ listing.quantity_available }}"
+            id="order-quantity" name="quantity" class="form-control" required
+            value="{{ listing.quantity_available if listing.quantity_available < 1 else 1 }}"
+            data-price="{{ listing.price_per_unit }}" data-max="{{ listing.quantity_available }}">
+          <div class="hint">Up to {{ listing.quantity_available }} {{ listing.unit }} available</div>
+        </div>
+        <div class="sl-field">
+          <label for="note">Note to farmer (optional)</label>
+          <textarea id="note" name="note" class="form-control" rows="2" placeholder="Delivery preferences, timing, etc."></textarea>
+        </div>
+        <div class="price-line">
+          <span class="sub" style="margin:0;">Order total</span>
+          <span class="price sl-mono" id="order-total-value">KES 0</span>
+        </div>
+        <button type="submit" class="sl-btn sl-btn-accent sl-btn-block">Place Order</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

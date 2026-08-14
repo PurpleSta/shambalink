@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}My Farm{% endblock %}
+
+{% block content %}
+<div class="sl-dash-header">
+  <div>
+    <h1>My Farm</h1>
+    <p>Manage your listings and track incoming orders.</p>
+  </div>
+  <a href="{{ url_for('dashboard.new_listing') }}" class="sl-btn sl-btn-accent">+ New Listing</a>
+</div>
+
+{% if subscription %}
+  <div class="sl-dash-banner">
+    <div class="sl-dash-banner-inner">
+      <span>Subscription active — valid until {{ subscription.end_date.strftime('%d %b %Y') }} ({{ subscription.days_remaining }} days left).</span>
+      <a href="{{ url_for('dashboard.subscription') }}" class="sl-link-muted">Manage &rarr;</a>
+    </div>
+  </div>
+{% else %}
+  <div class="sl-dash-banner">
+    <div class="sl-dash-banner-inner">
+      <span>You don't have an active subscription — you'll need one to list new produce.</span>
+      <a href="{{ url_for('dashboard.subscription') }}" class="sl-btn sl-btn-accent sl-btn-sm">Subscribe (KES 2000)</a>
+    </div>
+  </div>
+{% endif %}
+
+<div class="sl-stat-row">
+  <div class="sl-stat-card"><span class="num">{{ listings|length }}</span><span class="label">Total listings</span></div>
+  <div class="sl-stat-card"><span class="num">{{ active_count }}</span><span class="label">Active now</span></div>
+  <div class="sl-stat-card"><span class="num">{{ pending_count }}</span><span class="label">Orders awaiting you</span></div>
+  <div class="sl-stat-card"><span class="num">KES {{ "%.0f"|format(total_revenue) }}</span><span class="label">Completed revenue</span></div>
+</div>
+
+<div class="sl-table-wrap">
+  <h2 style="font-size:1.3rem;margin-bottom:16px;">Your listings</h2>
+  {% if listings %}
+    <table class="sl-table">
+      <thead>
+        <tr><th>Crop</th><th>Quantity</th><th>Price</th><th>Status</th><th>Listed</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for l in listings %}
+          <tr>
+            <td><a href="{{ url_for('main.listing_detail', listing_id=l.id) }}">{{ l.crop_name }}</a></td>
+            <td class="sl-mono">{{ l.quantity_available }} {{ l.unit }}</td>
+            <td class="sl-mono">KES {{ "%.0f"|format(l.price_per_unit) }}</td>
+            <td><span class="sl-badge sl-badge-{{ l.status }}">{{ l.status.replace('_',' ') }}</span></td>
+            <td>{{ l.created_at.strftime('%d %b %Y') }}</td>
+            <td class="sl-table-actions">
+              <a href="{{ url_for('dashboard.edit_listing', listing_id=l.id) }}" class="sl-btn sl-btn-outline sl-btn-sm">Edit</a>
+              <form method="post" action="{{ url_for('dashboard.delete_listing', listing_id=l.id) }}" onsubmit="return confirm('Remove this listing?');">
+                <button type="submit" class="sl-btn sl-btn-danger sl-btn-sm">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="sl-empty">
+      <h3>No listings yet</h3>
+      <p>Post your first harvest to start reaching buyers.</p>
+      <a href="{{ url_for('dashboard.new_listing') }}" class="sl-btn sl-btn-accent" style="margin-top:14px;">+ New Listing</a>
+    </div>
+  {% endif %}
+</div>
+
+<div class="sl-table-wrap" style="padding-top:0;">
+  <h2 style="font-size:1.3rem;margin-bottom:16px;">Incoming orders</h2>
+  {% if orders %}
+    <table class="sl-table">
+      <thead>
+        <tr><th>Order</th><th>Crop</th><th>Buyer</th><th>Qty</th><th>Total</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+          <tr>
+            <td class="sl-mono">#{{ o.id }}</td>
+            <td>{{ o.listing.crop_name }}</td>
+            <td>{{ o.buyer.name }}</td>
+            <td class="sl-mono">{{ o.quantity }} {{ o.listing.unit }}</td>
+            <td class="sl-mono">KES {{ "%.0f"|format(o.total_price) }}</td>
+            <td><span class="sl-badge sl-badge-{{ o.status }}">{{ o.status }}</span></td>
+            <td>
+              {% if o.status == 'pending' %}
+                <form method="post" action="{{ url_for('dashboard.update_order_status', order_id=o.id) }}" class="sl-table-actions">
+                  <input type="hidden" name="status" value="confirmed">
+                  <button type="submit" class="sl-btn sl-btn-leaf sl-btn-sm">Confirm</button>
+                </form>
+              {% elif o.status == 'confirmed' %}
+                <form method="post" action="{{ url_for('dashboard.update_order_status', order_id=o.id) }}">
+                  <input type="hidden" name="status" value="completed">
+                  <button type="submit" class="sl-btn sl-btn-outline sl-btn-sm">Mark Delivered</button>
+                </form>
+              {% else %}
+                <span class="hint">—</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="sl-empty"><p>No orders yet on your listings.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

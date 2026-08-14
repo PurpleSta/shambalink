@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<div class="sl-dash-header">
+  <div>
+    <h1>My Orders</h1>
+    <p>Track everything you've ordered from farmers on ShambaLink.</p>
+  </div>
+  <a href="{{ url_for('main.marketplace') }}" class="sl-btn sl-btn-accent">Browse Marketplace</a>
+</div>
+
+<div class="sl-stat-row">
+  <div class="sl-stat-card"><span class="num">{{ orders|length }}</span><span class="label">Total orders</span></div>
+  <div class="sl-stat-card"><span class="num">{{ pending_count }}</span><span class="label">Awaiting confirmation</span></div>
+  <div class="sl-stat-card"><span class="num">KES {{ "%.0f"|format(total_spent) }}</span><span class="label">Completed spend</span></div>
+</div>
+
+<div class="sl-table-wrap">
+  {% if orders %}
+    <table class="sl-table">
+      <thead>
+        <tr><th>Order</th><th>Crop</th><th>Farmer</th><th>Qty</th><th>Total</th><th>Status</th><th>Placed</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+          <tr>
+            <td class="sl-mono">#{{ o.id }}</td>
+            <td><a href="{{ url_for('main.listing_detail', listing_id=o.listing.id) }}">{{ o.listing.crop_name }}</a></td>
+            <td>{{ o.listing.farmer.name }}</td>
+            <td class="sl-mono">{{ o.quantity }} {{ o.listing.unit }}</td>
+            <td class="sl-mono">KES {{ "%.0f"|format(o.total_price) }}</td>
+            <td><span class="sl-badge sl-badge-{{ o.status }}">{{ o.status }}</span></td>
+            <td>{{ o.created_at.strftime('%d %b %Y') }}</td>
+            <td>
+              {% if o.status == 'pending' %}
+                <form method="post" action="{{ url_for('dashboard.cancel_order', order_id=o.id) }}" onsubmit="return confirm('Cancel this order?');">
+                  <button type="submit" class="sl-btn sl-btn-danger sl-btn-sm">Cancel</button>
+                </form>
+              {% else %}
+                <span class="hint">—</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="sl-empty">
+      <h3>No orders yet</h3>
+      <p>Browse the marketplace to place your first order.</p>
+      <a href="{{ url_for('main.marketplace') }}" class="sl-btn sl-btn-accent" style="margin-top:14px;">Browse Marketplace</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

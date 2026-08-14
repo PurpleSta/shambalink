@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Listing' if mode == 'edit' else 'New Listing' }}{% endblock %}
+
+{% block content %}
+<div class="sl-auth-wrap" style="max-width:560px;">
+  <div class="sl-form-card">
+    <h1>{{ 'Edit Listing' if mode == 'edit' else 'List Your Harvest' }}</h1>
+    <p class="sub">{{ 'Update quantity, price, or status.' if mode == 'edit' else 'Give buyers what they need to make a fast decision.' }}</p>
+
+    <form method="post" enctype="multipart/form-data">
+      <div class="sl-field">
+        <label for="crop_name">Crop / produce name</label>
+        <input type="text" id="crop_name" name="crop_name" class="form-control" required value="{{ form.get('crop_name', '') }}" placeholder="e.g. Fresh Tomatoes">
+      </div>
+
+      <div class="sl-field">
+        <label for="category">Category</label>
+        <select id="category" name="category" class="form-select" required>
+          <option value="">Choose a category</option>
+          {% for c in categories %}
+            <option value="{{ c }}" {{ 'selected' if c == form.get('category') }}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="sl-field">
+        <label for="description">Description (optional)</label>
+        <textarea id="description" name="description" class="form-control" rows="3" placeholder="Grade, farming practice, packaging, anything a buyer should know.">{{ form.get('description', '') }}</textarea>
+      </div>
+
+      <div class="sl-field">
+        <label for="image">Photo (optional)</label>
+        {% if mode == 'edit' and listing.image_filename %}
+          <div class="sl-image-preview">
+            <img src="{{ url_for('static', filename='uploads/' + listing.image_filename) }}" alt="{{ listing.crop_name }}">
+            <label class="sl-remove-image">
+              <input type="checkbox" name="remove_image" value="1"> Remove current photo
+            </label>
+          </div>
+        {% endif %}
+        <input type="file" id="image" name="image" class="form-control" accept=".png,.jpg,.jpeg,.webp">
+        <div class="hint">PNG, JPG, or WEBP, up to 5MB.</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="sl-field">
+          <label for="quantity_available">Quantity available</label>
+          <input type="number" step="0.01" min="0.01" id="quantity_available" name="quantity_available" class="form-control" required value="{{ form.get('quantity_available', '') }}">
+        </div>
+        <div class="sl-field">
+          <label for="unit">Unit</label>
+          <select id="unit" name="unit" class="form-select" required>
+            <option value="">Unit</option>
+            {% for u in units %}
+              <option value="{{ u }}" {{ 'selected' if u == form.get('unit') }}>{{ u }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="sl-field">
+        <label for="price_per_unit">Price per unit (KES)</label>
+        <input type="number" step="0.01" min="0.01" id="price_per_unit" name="price_per_unit" class="form-control" required value="{{ form.get('price_per_unit', '') }}">
+      </div>
+
+      <div class="sl-field">
+        <label for="location">Location</label>
+        <input type="text" id="location" name="location" class="form-control" required value="{{ form.get('location', '') }}" placeholder="e.g. Kirinyaga, Kenya">
+      </div>
+
+      <div class="sl-field">
+        <label for="harvest_date">Harvest date</label>
+        <input type="date" id="harvest_date" name="harvest_date" class="form-control"
+          value="{{ form.get('harvest_date').strftime('%Y-%m-%d') if form.get('harvest_date') and form.get('harvest_date').__class__.__name__ == 'date' else form.get('harvest_date', '') }}">
+      </div>
+
+      {% if mode == 'edit' %}
+        <div class="sl-field">
+          <label for="status">Status</label>
+          <select id="status" name="status" class="form-select">
+            <option value="active" {{ 'selected' if listing.status == 'active' }}>Active</option>
+            <option value="sold_out" {{ 'selected' if listing.status == 'sold_out' }}>Sold out</option>
+            <option value="inactive" {{ 'selected' if listing.status == 'inactive' }}>Inactive</option>
+          </select>
+        </div>
+      {% endif %}
+
+      <button type="submit" class="sl-btn sl-btn-accent sl-btn-block">{{ 'Save Changes' if mode == 'edit' else 'Publish Listing' }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

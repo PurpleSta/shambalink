@@ -1,0 +1,22 @@
+<a href="{{ url_for('main.listing_detail', listing_id=listing.id) }}" class="sl-card" style="text-decoration:none;">
+  {% if listing.image_filename %}
+    <img class="sl-card-image" src="{{ url_for('static', filename='uploads/' + listing.image_filename) }}" alt="{{ listing.crop_name }}">
+  {% else %}
+    <div class="sl-card-image-placeholder">No photo</div>
+  {% endif %}
+  <div class="sl-card-body">
+    <div class="sl-card-top">
+      <h3>{{ listing.crop_name }}</h3>
+      <span class="sl-card-category">{{ listing.category }}</span>
+    </div>
+    <p class="sl-card-desc">{{ (listing.description or "No description provided.")|truncate(90) }}</p>
+    <div class="sl-card-meta">
+      <span>{{ listing.location }}</span>
+      <span>{{ listing.quantity_available }} {{ listing.unit }} left</span>
+    </div>
+    <div class="sl-card-meta" style="border-top:none;padding-top:0;">
+      <span class="sl-card-price">KES {{ "%.0f"|format(listing.price_per_unit) }} <small>/ {{ listing.unit }}</small></span>
+      <span class="sl-badge sl-badge-{{ listing.status }}">{{ listing.status.replace('_',' ') }}</span>
+    </div>
+  </div>
+</a>

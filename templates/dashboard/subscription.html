@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Subscription{% endblock %}
+
+{% block content %}
+<div class="sl-dash-header">
+  <div>
+    <h1>Listing Subscription</h1>
+    <p>A paid subscription is required to list produce on ShambaLink.</p>
+  </div>
+</div>
+
+<div class="sl-section" style="padding-top:28px;">
+
+  {% if active_subscription %}
+    <div class="sl-sub-status sl-sub-status-active">
+      <div>
+        <span class="sl-badge sl-badge-active">Active</span>
+        <h2 style="margin-top:10px;">
+          {{ plans[active_subscription.plan]['label'] }}
+        </h2>
+        <p class="sub" style="margin-bottom:0;">
+          Valid until <strong>{{ active_subscription.end_date.strftime('%d %b %Y') }}</strong>
+          ({{ active_subscription.days_remaining }} days remaining)
+        </p>
+      </div>
+      <div class="sl-sub-status-num">
+        <span class="num sl-mono">KES {{ "%.0f"|format(active_subscription.amount) }}</span>
+        <span class="label">paid</span>
+      </div>
+    </div>
+
+  {% elif pending_subscription %}
+    <div class="sl-sub-status sl-sub-status-pending">
+      <div>
+        <span class="sl-badge sl-badge-pending">Awaiting Payment</span>
+        <h2 style="margin-top:10px;">{{ plans[pending_subscription.plan]['label'] }}</h2>
+        <p class="sub" style="margin-bottom:0;">
+          KES {{ "%.0f"|format(pending_subscription.amount) }} due to activate this plan.
+        </p>
+      </div>
+    </div>
+
+    <div class="sl-form-card" style="margin-top:24px;max-width:460px;">
+      <h3 style="font-size:1.1rem;">Complete payment</h3>
+      <form method="post" action="{{ url_for('dashboard.confirm_subscription_payment', subscription_id=pending_subscription.id) }}">
+        <div class="sl-field">
+          <label for="payment_reference">Payment reference (optional)</label>
+          <input type="text" id="payment_reference" name="payment_reference" class="form-control" placeholder="e.g. M-Pesa code">
+        </div>
+        <button type="submit" class="sl-btn sl-btn-accent sl-btn-block">Simulate Payment &amp; Activate</button>
+      </form>
+      <form method="post" action="{{ url_for('dashboard.cancel_subscription', subscription_id=pending_subscription.id) }}" style="margin-top:10px;" onsubmit="return confirm('Cancel this subscription request?');">
+        <button type="submit" class="sl-btn sl-btn-outline sl-btn-block">Cancel Request</button>
+      </form>
+    </div>
+
+  {% else %}
+    <div class="sl-sub-status sl-sub-status-none">
+      <span class="sl-badge sl-badge-inactive">No Active Subscription</span>
+      <p class="sub" style="margin-top:10px;margin-bottom:0;">Choose a plan below to start listing produce.</p>
+    </div>
+
+    <div class="sl-grid-3" style="margin-top:24px;max-width:760px;">
+      {% for key, plan in plans.items() %}
+        <div class="sl-how-card sl-plan-card">
+          <span class="step-label">{{ plan.label }}</span>
+          <h3 class="sl-mono">KES {{ plan.amount }}</h3>
+          <p>Renews every {{ 6 if key == 'biannual' else 12 }} months. Lists unlimited produce while active.</p>
+          <form method="post" action="{{ url_for('dashboard.subscribe') }}" style="margin-top:16px;">
+            <input type="hidden" name="plan" value="{{ key }}">
+            <button type="submit" class="sl-btn sl-btn-accent sl-btn-block">Choose {{ plan.label.split(' ')[0] }}</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if history %}
+    <div class="sl-table-wrap" style="padding:0;margin-top:48px;">
+      <h2 style="font-size:1.3rem;margin-bottom:16px;">Subscription history</h2>
+      <table class="sl-table">
+        <thead>
+          <tr><th>Plan</th><th>Amount</th><th>Status</th><th>Start</th><th>End</th><th>Requested</th></tr>
+        </thead>
+        <tbody>
+          {% for s in history %}
+            <tr>
+              <td>{{ plans[s.plan]['label'] }}</td>
+              <td class="sl-mono">KES {{ "%.0f"|format(s.amount) }}</td>
+              <td><span class="sl-badge sl-badge-{{ s.status }}">{{ s.status }}</span></td>
+              <td>{{ s.start_date.strftime('%d %b %Y') if s.start_date else '—' }}</td>
+              <td>{{ s.end_date.strftime('%d %b %Y') if s.end_date else '—' }}</td>
+              <td>{{ s.created_at.strftime('%d %b %Y') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

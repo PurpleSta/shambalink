@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Join ShambaLink{% endblock %}
+
+{% block content %}
+<div class="sl-auth-wrap">
+  <div class="sl-form-card">
+    <h1>Create your account</h1>
+    <p class="sub">Free for farmers and buyers alike.</p>
+
+    <form method="post">
+      <div class="sl-role-toggle">
+        <div class="sl-role-option">
+          <input type="radio" id="role-farmer" name="role" value="farmer" {{ 'checked' if form.get('role') == 'farmer' or not form.get('role') }}>
+          <label for="role-farmer">I'm a Farmer</label>
+        </div>
+        <div class="sl-role-option">
+          <input type="radio" id="role-buyer" name="role" value="buyer" {{ 'checked' if form.get('role') == 'buyer' }}>
+          <label for="role-buyer">I'm a Buyer</label>
+        </div>
+      </div>
+
+      <div class="sl-field">
+        <label for="name">Full name / Business name</label>
+        <input type="text" id="name" name="name" class="form-control" required value="{{ form.get('name', '') }}">
+      </div>
+      <div class="sl-field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-control" required value="{{ form.get('email', '') }}">
+      </div>
+      <div class="sl-field">
+        <label for="phone">Phone number</label>
+        <input type="tel" id="phone" name="phone" class="form-control" placeholder="07XX XXX XXX" value="{{ form.get('phone', '') }}">
+      </div>
+      <div class="sl-field">
+        <label for="location">Location</label>
+        <input type="text" id="location" name="location" class="form-control" placeholder="e.g. Kirinyaga, Kenya" value="{{ form.get('location', '') }}">
+      </div>
+      <div class="sl-field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control" required minlength="6">
+      </div>
+      <div class="sl-field">
+        <label for="confirm_password">Confirm password</label>
+        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required minlength="6">
+      </div>
+
+      <button type="submit" class="sl-btn sl-btn-accent sl-btn-block">Create Account</button>
+    </form>
+
+    <p class="sub" style="margin-top:22px;margin-bottom:0;">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Access Denied{% endblock %}
+{% block content %}
+<div class="sl-error-page">
+  <div class="code">403</div>
+  <h1>Not for you, not right now</h1>
+  <p style="color:var(--text-muted);">Your account type can't access this page.</p>
+  <a href="{{ url_for('main.index') }}" class="sl-btn sl-btn-accent" style="margin-top:20px;">Back Home</a>
+</div>
+{% endblock %}

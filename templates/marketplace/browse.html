@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Marketplace{% endblock %}
+
+{% block content %}
+<section class="sl-section" style="padding-top:44px;">
+  <div class="sl-section-head">
+    <div>
+      <h2>Marketplace</h2>
+      <p>{{ pagination.total }} active listing{{ '' if pagination.total == 1 else 's' }} from farmers across Kenya.</p>
+    </div>
+  </div>
+
+  <form method="get" class="sl-filter-bar">
+    <div>
+      <label for="q">Search</label>
+      <input type="text" id="q" name="q" class="form-control" placeholder="e.g. tomatoes, maize..." value="{{ search }}">
+    </div>
+    <div>
+      <label for="category">Category</label>
+      <select id="category" name="category" class="form-select">
+        <option value="">All categories</option>
+        {% for c in categories %}
+          <option value="{{ c }}" {{ 'selected' if c == selected_category }}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="location">Location</label>
+      <input type="text" id="location" name="location" class="form-control" placeholder="e.g. Kirinyaga" value="{{ location }}">
+    </div>
+    <div>
+      <button type="submit" class="sl-btn sl-btn-accent sl-btn-block">Filter</button>
+    </div>
+  </form>
+
+  {% if listings %}
+    <div class="sl-grid-listings">
+      {% for listing in listings %}
+        {% include "marketplace/_listing_card.html" %}
+      {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+      <div style="display:flex;justify-content:center;gap:10px;margin-top:36px;">
+        {% if pagination.has_prev %}
+          <a class="sl-btn sl-btn-outline sl-btn-sm" href="{{ url_for('main.marketplace', page=pagination.prev_num, q=search, category=selected_category, location=location) }}">&larr; Prev</a>
+        {% endif %}
+        <span class="sl-btn sl-btn-sm" style="border:1px solid var(--border);">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+        {% if pagination.has_next %}
+          <a class="sl-btn sl-btn-outline sl-btn-sm" href="{{ url_for('main.marketplace', page=pagination.next_num, q=search, category=selected_category, location=location) }}">Next &rarr;</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="sl-empty">
+      <h3>No listings match your search</h3>
+      <p>Try clearing a filter, or check back soon — new harvests are posted daily.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
