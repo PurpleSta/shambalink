@@ -26,6 +26,16 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Engine options: helpful for serverless or pooled environments.
+    # These options are passed to SQLAlchemy's create_engine and can
+    # reduce stale-connection errors when the app is deployed to Vercel.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,
+        "pool_size": 5,
+        "max_overflow": 10,
+    }
+
     # Pagination
     LISTINGS_PER_PAGE = 9
 
